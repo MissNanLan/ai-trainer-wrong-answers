@@ -30,6 +30,15 @@ class UnifiedQuestionBankTests(unittest.TestCase):
         self.assertIn("initialWrongIds", html)
         self.assertIn("question-bank-300.json", html)
 
+    def test_navigation_clears_saved_position_before_rerendering(self):
+        html = Path("index.html").read_text(encoding="utf-8")
+
+        start = html.index("function moveQuestion(delta)")
+        end = html.index("function render()", start)
+        move_function = html[start:end]
+        self.assertIn("delete progress[mode].questionId", move_function)
+        self.assertIn("idx+=delta", move_function)
+
 
 if __name__ == "__main__":
     unittest.main()
