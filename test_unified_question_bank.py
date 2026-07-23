@@ -22,6 +22,14 @@ class UnifiedQuestionBankTests(unittest.TestCase):
         self.assertEqual(list(range(1, 301)), [question["id"] for question in data])
         self.assertTrue(all([option["key"] for option in question["options"]] == list("ABCD") for question in data))
 
+    def test_app_contains_complete_and_wrong_entry_modes(self):
+        html = Path("index.html").read_text(encoding="utf-8")
+
+        self.assertIn("完整题库", html)
+        self.assertIn("错题集", html)
+        self.assertIn("initialWrongIds", html)
+        self.assertIn("question-bank-300.json", html)
+
 
 if __name__ == "__main__":
     unittest.main()
