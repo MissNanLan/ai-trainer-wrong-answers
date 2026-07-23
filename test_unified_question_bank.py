@@ -1,6 +1,8 @@
 import unittest
+import json
+from pathlib import Path
 
-from build_unified_question_bank import parse_question_bank
+from build_unified_question_bank import main, parse_question_bank
 
 
 class UnifiedQuestionBankTests(unittest.TestCase):
@@ -12,6 +14,13 @@ class UnifiedQuestionBankTests(unittest.TestCase):
         self.assertEqual(list(range(1, 301)), [question["id"] for question in questions])
         self.assertTrue(all(question["answer"] in "ABCD" for question in questions))
         self.assertTrue(all([option["key"] for option in question["options"]] == list("ABCD") for question in questions))
+
+    def test_generated_payload_has_unique_ids_and_four_options(self):
+        main()
+        data = json.loads(Path("question-bank-300.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(list(range(1, 301)), [question["id"] for question in data])
+        self.assertTrue(all([option["key"] for option in question["options"]] == list("ABCD") for question in data))
 
 
 if __name__ == "__main__":
