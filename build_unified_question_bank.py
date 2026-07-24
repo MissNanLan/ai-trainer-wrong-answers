@@ -9,8 +9,18 @@ from pathlib import Path
 from docx import Document
 
 
-SOURCE_ROOT = Path(__file__).resolve().parents[1]
-QUESTION_FILE = SOURCE_ROOT / "人工智能训练师三级_单选题题目 1-300.docx"
+QUESTION_NAME = "人工智能训练师三级_单选题题目 1-300.docx"
+
+
+def source_root() -> Path:
+    for parent in Path(__file__).resolve().parents:
+        if (parent / QUESTION_NAME).exists():
+            return parent
+    raise FileNotFoundError(f"找不到 {QUESTION_NAME}")
+
+
+SOURCE_ROOT = source_root()
+QUESTION_FILE = SOURCE_ROOT / QUESTION_NAME
 ANSWER_FILES = [
     SOURCE_ROOT / "人工智能训练师三级_单选题1-100_答案解析.docx",
     SOURCE_ROOT / "人工智能训练师三级_单选题101-200_答案解析.docx",
