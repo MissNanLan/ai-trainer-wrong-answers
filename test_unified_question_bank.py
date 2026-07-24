@@ -40,5 +40,15 @@ class UnifiedQuestionBankTests(unittest.TestCase):
         self.assertIn("idx+=delta", move_function)
 
 
+    def test_reset_preserves_separately_stored_wrong_questions(self):
+        html = Path("index.html").read_text(encoding="utf-8")
+
+        self.assertIn('wrongQuestionIds=new Set(JSON.parse(localStorage.getItem(KEY+":wrong-questions")||"[]"))', html)
+        self.assertIn("wrongQuestionIds.add(q.id)", html)
+        self.assertIn("wrongQuestionIds.has(q.id)", html)
+        reset_handler = html[html.index('document.querySelector("#resetBtn").onclick='):]
+        self.assertNotIn("wrongQuestionIds.clear()", reset_handler)
+
+
 if __name__ == "__main__":
     unittest.main()
