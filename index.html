@@ -15,7 +15,7 @@
 <div class="footer"><button id="exportBtn">导出学习记录</button><button id="resetBtn">清空本机记录</button></div>
 </main><script>
 const LEGACY_KEY="ai-trainer-l3-wrong-v1",KEY="ai-trainer-l3-v2";
-const initialWrongIds=new Set([2,3,8,9,10,24,27,29,42,44,45,46,51,56,58,60,61,62,71,73,77,79,83,84,87,90,94,95,96,97,100,101,102,105,106,114,115,116,117,120,121,122,123,124,125,129,133,136,137,138,139,140,144,146,153,154,155,156,157,158,159,160,166,167,169,171,177,179,181,182,183,186,196,199,200,202,204,205,208,214,216,217,219,222,223,224,225,226,227,229,230,236,237,242,243,244,247,248,249,250,254,255,257,260,263,269,272,273,274,281,283,286,287,289,291,293,294,297,300]);
+const initialWrongIds=new Set();
 let questions=[],records=JSON.parse(localStorage.getItem(KEY+":records")||"null")||JSON.parse(localStorage.getItem(LEGACY_KEY)||"{}"),wrongRecords=JSON.parse(localStorage.getItem(KEY+":wrong-records")||"{}"),corrections=JSON.parse(localStorage.getItem(KEY+":corrections")||"null")||JSON.parse(localStorage.getItem(LEGACY_KEY+":corrections")||"{}"),progress=JSON.parse(localStorage.getItem(KEY+":progress")||"{}"),mode="full",filter="all",idx=0,selected=null,editing=false,correctionChoice=null,correctionNote="";
 let wrongQuestionIds=new Set(JSON.parse(localStorage.getItem(KEY+":wrong-questions")||"[]")),removedWrongQuestionIds=new Set(JSON.parse(localStorage.getItem(KEY+":removed-wrong-questions")||"[]"));
 Object.entries(records).forEach(([id,record])=>{if(record?.submitted&&!record.correct&&!removedWrongQuestionIds.has(Number(id)))wrongQuestionIds.add(Number(id))});
@@ -23,7 +23,7 @@ const save=()=>{localStorage.setItem(KEY+":records",JSON.stringify(records));loc
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const answer=q=>corrections[q.id]?.answer||q.answer;
 const activeRecords=()=>mode==="wrong"?wrongRecords:records;
-const candidates=()=>questions.filter(q=>mode==="full"||((initialWrongIds.has(q.id)||wrongQuestionIds.has(q.id))&&!removedWrongQuestionIds.has(q.id)));
+const candidates=()=>questions.filter(q=>mode==="full"||(wrongQuestionIds.has(q.id)&&!removedWrongQuestionIds.has(q.id)));
 const list=()=>{let currentRecords=activeRecords();return candidates().filter(q=>filter==="all"||filter==="uncertain"&&currentRecords[q.id]?.uncertain||filter==="unanswered"&&!currentRecords[q.id]?.submitted)};
 function rescore(){[records,wrongRecords].forEach(recordSet=>questions.forEach(q=>{if(recordSet[q.id]?.submitted){recordSet[q.id].correct=recordSet[q.id].choice===answer(q);if(!recordSet[q.id].correct&&!removedWrongQuestionIds.has(q.id))wrongQuestionIds.add(q.id)}}));save()}
 function selectMode(next){mode=next;let p=progress[mode]||{};const validFilters=mode==="full"?["all","uncertain","unanswered"]:["all","uncertain","unanswered"];filter=validFilters.includes(p.filter)?p.filter:"all";idx=0;selected=null;editing=false;document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("on",b.dataset.mode===mode));render()}
