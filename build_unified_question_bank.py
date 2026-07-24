@@ -30,7 +30,7 @@ ANSWER_FILES = [
 QUESTION_RE = re.compile(r"^(\d{1,3})[.．、]\s*(.+)$")
 OPTION_RE = re.compile(r"^[（(]([ABCD])[）)]\s*(.+)$")
 QUICK_ANSWER_RE = re.compile(r"(?<!\d)(\d{1,3})\s*[.．、]\s*([ABCD])(?=\s|$)")
-DETAILED_ANSWER_RE = re.compile(r"^(\d{1,3})[.．、]\s*答案[:：]\s*([ABCD])$")
+DETAILED_ANSWER_RE = re.compile(r"^(\d{1,3})[.．、]\s*答案[:：]\s*([ABCD])\s*\n解析[:：]\s*(.+)$", re.S)
 
 
 def nonempty_paragraphs(document: Document) -> list[str]:
@@ -83,16 +83,13 @@ def parse_answers() -> tuple[dict[int, dict], list[str]]:
 
         paragraphs = nonempty_paragraphs(document)
         for line in paragraphs:
-            for number, answer in QUICK_ANSWER_RE.findall(line):
-                answers[int(number)] = {"answer": answer, "note": ""}
-
-        for index, line in enumerate(paragraphs):
             detailed = DETAILED_ANSWER_RE.match(line)
-            if not detailed:
+            if detailed:
+                question_id, answer, note = int(detailed.group(1)), detailed.group(2), detailed.group(3).strip()
+                answers[question_id] = {"answer": answer, "note": note}
                 continue
-            question_id, answer = int(detailed.group(1)), detailed.group(2)
-            note = paragraphs[index + 1].removeprefix("解析：") if index + 1 < len(paragraphs) else ""
-            answers[question_id] = {"answer": answer, "note": note}
+            for number, answer in QUICK_ANSWER_RE.findall(line):
+                answers.setdefault(int(number), {"answer": answer, "note": ""})
 
     return answers, issues
 

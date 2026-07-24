@@ -14,6 +14,7 @@ class UnifiedQuestionBankTests(unittest.TestCase):
         self.assertEqual(list(range(1, 301)), [question["id"] for question in questions])
         self.assertTrue(all(question["answer"] in "ABCD" for question in questions))
         self.assertTrue(all([option["key"] for option in question["options"]] == list("ABCD") for question in questions))
+        self.assertTrue(all(question["note"] and question["note"] != "请结合题库答案解析复习。" for question in questions))
 
     def test_generated_payload_has_unique_ids_and_four_options(self):
         main()
